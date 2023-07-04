@@ -1,0 +1,37 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import desc
+
+# Initialize SparkSession
+spark = SparkSession.builder.appName("CustomersExample").getOrCreate()
+
+# Read the "Orders" and "Customers" tables into DataFrames
+orders_df = spark.read.format("jdbc").options(
+    url="jdbc:mysql://localhost:3306/your_database_name",
+    driver="com.mysql.jdbc.Driver",
+    dbtable="Orders",
+    user="your_username",
+    password="your_password"
+).load()
+
+customers_df = spark.read.format("jdbc").options(
+    url="jdbc:mysql://localhost:3306/your_database_name",
+    driver="com.mysql.jdbc.Driver",
+    dbtable="Customers",
+    user="your_username",
+    password="your_password"
+).load()
+
+# Join the DataFrames on the "customer_id" column
+joined_df = orders_df.join(customers_df, orders_df.customer_id == customers_df.customer_id)
+
+# Group by customer and calculate the total amount spent
+total_spent_df = joined_df.groupBy("customer_id", "customer_name").sum("amount_spent").withColumnRenamed("sum(amount_spent)", "total_amount_spent")
+
+# Sort the DataFrame by total amount spent in descending order
+sorted_df = total_spent_df.orderBy(desc("total_amount_spent"))
+
+# Retrieve the top 5 customers
+top_5_customers = sorted_df.limit(5)
+
+# Display the result
+top_5_customers.show()
