@@ -1,0 +1,11 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import avg
+
+# Initialize SparkSession
+spark = SparkSession.builder.appName("AverageTransactionExample").getOrCreate()
+
+# Calculate the average transaction amount for each user
+avg_amount_df = transactions.groupBy("user_id").agg(avg("amount").alias("average_transaction_amount"))
+
+# Display the result
+avg_amount_df.show()
