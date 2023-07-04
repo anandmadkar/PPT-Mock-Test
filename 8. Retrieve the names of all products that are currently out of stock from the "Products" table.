@@ -1,0 +1,22 @@
+from pyspark.sql import SparkSession
+
+# Initialize SparkSession
+spark = SparkSession.builder.appName("ProductsExample").getOrCreate()
+
+# Read the "Products" table into a DataFrame
+products_df = spark.read.format("jdbc").options(
+    url="jdbc:mysql://localhost:3306/your_database_name",
+    driver="com.mysql.jdbc.Driver",
+    dbtable="Products",
+    user="your_username",
+    password="your_password"
+).load()
+
+# Filter the DataFrame to retrieve products that are out of stock
+out_of_stock_products_df = products_df.filter(products_df.stock_quantity == 0)
+
+# Select only the "name" column
+out_of_stock_product_names = out_of_stock_products_df.select("name")
+
+# Display the result
+out_of_stock_product_names.show()
