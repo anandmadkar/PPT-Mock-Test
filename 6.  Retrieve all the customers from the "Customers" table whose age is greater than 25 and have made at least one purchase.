@@ -1,1 +1,22 @@
+from pyspark.sql import SparkSession
+
+# Initialize SparkSession
+spark = SparkSession.builder.appName("CustomersExample").getOrCreate()
+
+# Read the "Customers" table into a DataFrame
+customers_df = spark.read.format("jdbc").options(
+    url="jdbc:mysql://localhost:3306/your_database_name",
+    driver="com.mysql.jdbc.Driver",
+    dbtable="Customers",
+    user="your_username",
+    password="your_password"
+).load()
+
+# Apply the filter to retrieve customers with age greater than 25 and at least one purchase
+filtered_customers_df = customers_df.filter((customers_df.age > 25) & (customers_df.num_purchases > 0))
+
+# Display the result
+filtered_customers_df.show()
+
+
 
