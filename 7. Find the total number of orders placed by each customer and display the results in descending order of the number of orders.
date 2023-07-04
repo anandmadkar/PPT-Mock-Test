@@ -1,0 +1,23 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import count
+
+# Initialize SparkSession
+spark = SparkSession.builder.appName("OrdersExample").getOrCreate()
+
+# Read the "Orders" table into a DataFrame
+orders_df = spark.read.format("jdbc").options(
+    url="jdbc:mysql://localhost:3306/your_database_name",
+    driver="com.mysql.jdbc.Driver",
+    dbtable="Orders",
+    user="your_username",
+    password="your_password"
+).load()
+
+# Group by customer and count the number of orders
+order_counts_df = orders_df.groupBy("customer").agg(count("*").alias("order_count"))
+
+# Sort the DataFrame in descending order of the number of orders
+sorted_order_counts_df = order_counts_df.orderBy("order_count", ascending=False)
+
+# Display the result
+sorted_order_counts_df.show()
