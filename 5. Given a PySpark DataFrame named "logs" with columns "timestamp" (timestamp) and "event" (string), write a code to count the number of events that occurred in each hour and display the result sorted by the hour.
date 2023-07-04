@@ -1,0 +1,18 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import hour
+from pyspark.sql.functions import count
+
+# Initialize SparkSession
+spark = SparkSession.builder.appName("CountEventsExample").getOrCreate()
+
+# Extract the hour from the timestamp column
+logs_with_hour = logs.withColumn("hour", hour("timestamp"))
+
+# Count the number of events that occurred in each hour
+event_counts = logs_with_hour.groupBy("hour").agg(count("event").alias("event_count"))
+
+# Sort the DataFrame by hour
+sorted_event_counts = event_counts.orderBy("hour")
+
+# Display the result
+sorted_event_counts.show()
