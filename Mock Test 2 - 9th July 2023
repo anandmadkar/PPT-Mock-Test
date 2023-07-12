@@ -1,3 +1,70 @@
+1. Write an SQL query to find the second-highest salary from an "Employees" table.
+
+Solution ----
 SELECT MAX(salary) AS second_highest_salary
 FROM Employees
 WHERE salary < (SELECT MAX(salary) FROM Employees);
+
+###############################################################################################################################################
+
+2. Write a MapReduce program to calculate the word count of a given input text file.
+
+Solution ---
+
+from mrjob.job import MRJob
+import re
+
+class WordCount(MRJob):
+    def mapper(self, _, line):
+        # Split the line into words
+        words = re.findall(r'\w+', line.lower())
+
+        # Emit each word as a key-value pair with a count of 1
+        for word in words:
+            yield word, 1
+
+    def reducer(self, word, counts):
+        # Sum the counts for each word
+        total_count = sum(counts)
+
+        # Emit the word and its total count
+        yield word, total_count
+
+if __name__ == '__main__':
+    WordCount.run()
+
+To run the MapReduce job on a given input text file, use the following command:
+python wordcount.py input.txt > output.txt
+
+#################################################################################################################################################
+
+
+3. Write a Spark program to count the number of occurrences of each word in a given text file.
+
+Solution ---
+
+from pyspark import SparkContext, SparkConf
+
+# Create Spark configuration
+conf = SparkConf().setAppName("WordCount")
+sc = SparkContext(conf=conf)
+
+# Load the text file
+text_file = sc.textFile("path/to/your/text_file.txt")
+
+# Split each line into words and flatten the result
+words = text_file.flatMap(lambda line: line.split(" "))
+
+# Assign a count of 1 to each word
+word_counts = words.map(lambda word: (word, 1))
+
+# Sum the counts for each word
+word_counts = word_counts.reduceByKey(lambda a, b: a + b)
+
+# Print the word counts
+for word, count in word_counts.collect():
+    print(f"{word}: {count}")
+
+# Stop the Spark context
+sc.stop()
+
